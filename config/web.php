@@ -1,18 +1,14 @@
 <?php
 
-$params = require(__DIR__ . '/params.php');
+$common = require(__DIR__ . '/common.php');
+$localCommon = file_exists(__DIR__ . '/local.common.php') ? require(__DIR__ . '/local.common.php') : [];
+$local = file_exists(__DIR__ . '/local.web.php') ? require(__DIR__ . '/local.web.php') : [];
 
 $config = [
-    'id' => 'basic',
-    'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
     'components' => [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => '',
-        ],
-        'cache' => [
-            'class' => 'yii\caching\FileCache',
         ],
         'user' => [
             'identityClass' => 'app\models\User',
@@ -28,16 +24,6 @@ $config = [
             // for the mailer to send real emails.
             'useFileTransport' => true,
         ],
-        'log' => [
-            'traceLevel' => YII_DEBUG ? 3 : 0,
-            'targets' => [
-                [
-                    'class' => 'yii\log\FileTarget',
-                    'levels' => ['error', 'warning'],
-                ],
-            ],
-        ],
-        'db' => require(__DIR__ . '/db.php'),
         /*
         'urlManager' => [
             'enablePrettyUrl' => true,
@@ -47,7 +33,7 @@ $config = [
         ],
         */
     ],
-    'params' => $params,
+    'params' => [],
 ];
 
 if (YII_ENV_DEV) {
@@ -56,11 +42,12 @@ if (YII_ENV_DEV) {
     $config['modules']['debug'] = [
         'class' => 'yii\debug\Module',
     ];
-
-    $config['bootstrap'][] = 'gii';
-    $config['modules']['gii'] = [
-        'class' => 'yii\gii\Module',
-    ];
 }
 
-return $config;
+return \yii\helpers\ArrayHelper::merge(
+    $common, \yii\helpers\ArrayHelper::merge(
+        $config, \yii\helpers\ArrayHelper::merge(
+            $localCommon, $local
+        )
+    )
+);

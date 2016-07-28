@@ -1,43 +1,24 @@
 <?php
 
-$params = require(__DIR__ . '/params.php');
-$db = require(__DIR__ . '/db.php');
+$common = require(__DIR__ . '/common.php');
+$localCommon = file_exists(__DIR__ . '/local.common.php') ? require(__DIR__ . '/local.common.php') : [];
+$local = file_exists(__DIR__ . '/local.console.php') ? require(__DIR__ . '/local.console.php') : [];
 
 $config = [
-    'id' => 'basic-console',
-    'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
     'controllerNamespace' => 'app\commands',
     'components' => [
-        'cache' => [
-            'class' => 'yii\caching\FileCache',
-        ],
-        'log' => [
-            'targets' => [
-                [
-                    'class' => 'yii\log\FileTarget',
-                    'levels' => ['error', 'warning'],
-                ],
-            ],
-        ],
-        'db' => $db,
     ],
-    'params' => $params,
-    /*
-    'controllerMap' => [
-        'fixture' => [ // Fixture generation command line.
-            'class' => 'yii\faker\FixtureController',
-        ],
-    ],
-    */
+    'params' => [],
 ];
 
 if (YII_ENV_DEV) {
-    // configuration adjustments for 'dev' environment
-    $config['bootstrap'][] = 'gii';
-    $config['modules']['gii'] = [
-        'class' => 'yii\gii\Module',
-    ];
+    
 }
 
-return $config;
+return \yii\helpers\ArrayHelper::merge(
+    $common, \yii\helpers\ArrayHelper::merge(
+        $config, \yii\helpers\ArrayHelper::merge(
+            $localCommon, $local
+        )
+    )
+);
